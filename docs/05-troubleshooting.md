@@ -9,6 +9,7 @@
 - [E. dsh 报 socket stream idle timeout](#e-dsh-报-socket-stream-idle-timeout)
 - [F. 上传文件夹失败](#f-上传文件夹失败)
 - [G. 装不上 / 装到一半报权限错误](#g-装不上--装到一半报权限错误)
+- [H. dsh 模型选择器里看不到本地模型](#h-dsh-模型选择器里看不到本地模型)
 
 ---
 
@@ -262,6 +263,103 @@ PermissionError: [Errno 13] Permission denied: 'C:\Python314\.strata-pip.json'
 **原因**：上游 `setup.py` 直接调用系统 Python，而系统 Python 装在只读目录。
 
 **修法**：本仓库的 `tools\install-strata.bat` 已经绕过了这个问题——它先在 `STRATA_HOME\.venv` 建虚拟环境，再用虚拟环境的解释器跑 `setup.py`。**用它装，不要直接跑上游的安装脚本。**
+
+---
+
+## H. dsh 模型选择器里看不到本地模型
+
+**症状**：dsh 的模型下拉里只有 `DeepSeek-V41-Flash` / `DeepSeek-V4-Pro`，没有 `Strata 本地`；发消息还报：
+
+```
+no API key for provider route "deepseek-official"
+```
+
+### 根因：改错 profile
+
+dsh 的配置是**按 profile 分开**的，不同启动方式读不同文件：
+
+| 启动方式 | 读的 profile |
+|---|---|
+| `dsh web`（`127.0.0.1:3080`） | `~/.dsh/profiles/web/cordis.patch.yml` |
+| `dsh --profile headless ...` | `~/.dsh/profiles/headless/cordis.patch.yml` |
+| DeepSeek Harness 桌面应用（Electron） | `~/.dsh/profiles/desktop/cordis.patch.yml` |
+
+早期只往 `web` / `headless` 里写 `strata-local`，**`desktop` 里没有 `llm-pi-ai` 条目**。桌面版一启动，模型选择器里就只剩官方 DeepSeek 那一组，默认模型也还是 `deepseek-official`。
+
+> 注意：`desktop` 档里的 `llm-pi-ai` 是**整段缺失**，不是缩进错。所以"检查缩进"这条路查不出来——要去确认这个键在不在。
+
+### 怎么确认
+
+**第 1 步：确认 dsh 读的是哪个 profile。**
+
+```powershell
+Get-CimInstance Win32_Process -Filter "name = 'node.exe'" |
+  Where-Object { $_.CommandLine -match 'dsh' } |
+  Select-Object ProcessId, CommandLine
+```
+
+命令行里是 `... bin.js web` → `web`；是桌面应用 → `desktop`。
+
+**第 2 步：确认那个 profile 里有没有 provider。**
+
+```powershell
+Select-String -Path "$HOME\.dsh\profiles\desktop\cordis.patch.yml" -Pattern 'llm-pi-ai|strata-local'
+```
+
+两条都搜到才算配置在位。
+
+**第 3 步（可选，最硬的证据）：直接问后端要模型目录。**
+
+这一步绕开 UI，直接看 dsh 真正注册了哪些 provider。先从 `dsh web` 的启动输出里拿到带 `?token=` 的地址，然后：
+
+```powershell
+$token = '<启动输出里的 token>'
+$s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+Invoke-WebRequest -UseBasicParsing -Uri "http://127.0.0.1:3080/?token=$token" -WebSession $s | Out-Null
+$cookie = ($s.Cookies.GetCookies('http://127.0.0.1:3080') | ForEach-Object { "$($_.Name)=$($_.Value)" }) -join '; '
+
+$rpc  = [guid]::NewGuid().ToString()
+$body = @{ type='client-request'; rpcId=$rpc; method='session/modelCatalog'; payload=@{ args=@{} } } |
+        ConvertTo-Json -Compress -Depth 6
+$tmp  = Join-Path $env:TEMP 'dsh_rpc.json'
+[IO.File]::WriteAllText($tmp, $body, (New-Object Text.UTF8Encoding($false)))
+
+curl.exe -s -H "content-type: application/json" -H "cookie: $cookie" --data-binary "@$tmp" `
+  http://127.0.0.1:3080/api/session/modelCatalog
+```
+
+返回的 JSON 里看两个字段：
+
+```json
+"default":           { "provider": "strata-local", "model": "qwen3.8-flash-next-iq2_xs" },
+"routableProviders": [ "deepseek-official", "ollama-local", "strata-local", ... ]
+```
+
+- `routableProviders` 里有 `strata-local` → 后端没问题，是**前端页面缓存**或**旧会话**的问题
+- 没有 `strata-local` → 配置没被加载，回到第 2 步
+
+> 两个容易卡住的点：`payload` 必须写成 `{"args":{}}`，写成 `{}` 会返回
+> `Remote payload must contain exactly one plain-object args field`；
+> 不带 cookie 会返回 `401 unauthorized`（这个 cookie 由 `?token=` 那一步种下）。
+
+### 修法
+
+```bat
+python integrations\dsh\apply.py            :: 先看会改哪些文件
+python integrations\dsh\apply.py --apply    :: 写入（自动备份）
+```
+
+脚本会遍历 `profiles\` 下所有 profile，缺 `llm-pi-ai` 条目的整段补上，并把 `agent-default-model` 指向 `strata-local`。
+
+然后：
+
+1. **完全退出 dsh**（含托盘 / 关掉那个命令行窗口），再启动。配置只在启动时读。
+2. **新开一个会话**。旧会话里存着 `model/selection` 事件，会继续用它当时选中的 `deepseek-official`，改默认值不会影响已存在的会话。
+3. 还看不到就按 `Ctrl + F5` 强刷页面。
+
+### 顺带说明
+
+`no API key for provider route "deepseek-official"` 这个报错本身不是密钥丢了，而是**会话钉在了官方路由上**。修好 provider 后把会话切到 `strata-local` 即可；如果还想用官方 DeepSeek，再单独补 `DEEPSEEK_API_KEY`。
 
 ---
 
