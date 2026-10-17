@@ -80,7 +80,7 @@ Strata 提供 OpenAI 兼容接口，所以用 `openai-completions`。
 ### 1. 配置合并是否正确
 
 ```bat
-node <DSH_HOME>\node_modules\@deepseek-ai\dsh\lib\bin.js --profile web --dump-config
+node <DSH_DIR>\node_modules\@deepseek-ai\dsh\lib\bin.js --profile web --dump-config
 ```
 
 在输出里搜 `strata-local`。搜得到就说明配置被正确合并了。

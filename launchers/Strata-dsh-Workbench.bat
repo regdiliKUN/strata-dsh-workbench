@@ -66,7 +66,7 @@ if errorlevel 1 (
 
 echo       Strata  : %STRATA_HOME%
 echo       Data    : %STRATA_DATA%
-echo       dsh     : %DSH_HOME%
+echo       dsh     : %DSH_DIR%
 echo       node    : %NODE_EXE%
 echo       log     : %LOGFILE%
 echo.
@@ -136,7 +136,7 @@ echo   Keep this window open. Closing it stops dsh.
 echo.
 echo [3/3] starting dsh >> "%LOGFILE%" 2>&1
 
-cd /d "%DSH_HOME%"
+cd /d "%DSH_DIR%"
 "%NODE_EXE%" "%DSH_BIN%" web
 set "RC=%ERRORLEVEL%"
 

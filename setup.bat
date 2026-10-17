@@ -32,7 +32,7 @@ call "%ROOT%\config\resolve.bat"
 echo       STRATA_HOME    = %STRATA_HOME%
 echo       STRATA_DATA    = %STRATA_DATA%
 echo       STRATA_PROFILE = %STRATA_PROFILE%
-echo       DSH_HOME       = %DSH_HOME%
+echo       DSH_DIR        = %DSH_DIR%
 echo       NODE_EXE       = %NODE_EXE%
 echo       PYTHON_EXE     = %PYTHON_EXE%
 echo.
@@ -45,7 +45,7 @@ if defined PROBLEM (
     echo   [WARN] Some components could not be located automatically.
     echo.
     echo          STRATA_HOME must contain serve\server.py
-    echo          DSH_HOME    must contain node_modules\@deepseek-ai\dsh\lib\bin.js
+    echo          DSH_DIR     must contain node_modules\@deepseek-ai\dsh\lib\bin.js
     echo.
     echo          You will be able to correct them in config\paths.bat
     echo          after this script writes it.
@@ -70,7 +70,7 @@ if exist "%ROOT%\config\paths.bat" (
     echo set "STRATA_HOME=%STRATA_HOME%"
     echo set "STRATA_DATA=%STRATA_DATA%"
     echo set "STRATA_PROFILE=%STRATA_PROFILE%"
-    echo set "DSH_HOME=%DSH_HOME%"
+    echo set "DSH_DIR=%DSH_DIR%"
     echo set "NODE_EXE=%NODE_EXE%"
     echo set "PYTHON_EXE=%PYTHON_EXE%"
     echo set "STRATA_PORT=%STRATA_PORT%"

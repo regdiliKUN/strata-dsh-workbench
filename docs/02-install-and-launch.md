@@ -70,7 +70,7 @@ setup.bat
 | `STRATA_HOME` | Strata 源码目录 | 必须含 `serve\server.py` |
 | `STRATA_DATA` | 模型数据目录 | 必须含 `models\` |
 | `STRATA_PROFILE` | 用哪个量化规格 | `iq2_xs` / `iq3_s` / `iq3_xxs` / `q2_0` |
-| `DSH_HOME` | dsh 运行时目录 | 必须含 `node_modules\@deepseek-ai\dsh\lib\bin.js` |
+| `DSH_DIR` | dsh 运行时（安装）目录 | 必须含 `node_modules\@deepseek-ai\dsh\lib\bin.js`；**不要写成 `DSH_HOME`**，那是 dsh 自己的状态目录变量 |
 | `NODE_EXE` | Node 可执行文件 | 留 `node` 走 PATH |
 | `PYTHON_EXE` | Python 可执行文件 | 留空自动探测 |
 | `STRATA_PORT` | 引擎端口 | 默认 8080 |

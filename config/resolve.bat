@@ -82,7 +82,19 @@ if exist "%APPDATA%\nvm\current\node.exe"                set "NODE_EXE=%APPDATA%
 
 REM ============================================================
 REM  AUTO-DETECT: DeepSeek Harness
+REM  ----------------------------------------------------------
+REM  DSH_DIR is the INSTALL directory (where bin.js lives).
+REM  It is deliberately NOT called DSH_HOME: dsh itself reads the
+REM  environment variable DSH_HOME to locate its state directory
+REM  (profiles, credentials, sessions). Exporting an install path
+REM  as DSH_HOME makes dsh create a second, empty home there and
+REM  silently ignore the user's real configuration.
 REM ============================================================
+call :check_dsh "%DSH_DIR%"
+if not errorlevel 1 goto dsh_done
+
+REM Backward compatibility with old config\paths.bat files that
+REM used DSH_HOME for the install path.
 call :check_dsh "%DSH_HOME%"
 if not errorlevel 1 goto dsh_done
 
@@ -99,6 +111,13 @@ for %%D in (
 )
 
 :dsh_done
+
+REM dsh's own state directory. Point it at the real home so the
+REM profiles and credentials the user configured are the ones used.
+REM An old paths.bat that used DSH_HOME for the install path is
+REM detected and discarded here.
+if defined DSH_DIR if /i "%DSH_HOME%"=="%DSH_DIR%" set "DSH_HOME="
+if not defined DSH_HOME set "DSH_HOME=%USERPROFILE%\.dsh"
 
 REM ============================================================
 REM  AUTO-DETECT: Python
@@ -140,7 +159,7 @@ REM  Derived paths
 REM ============================================================
 if defined STRATA_HOME set "STRATA_SERVER=%STRATA_HOME%\serve\server.py"
 if defined STRATA_HOME set "STRATA_VENV=%STRATA_HOME%\.venv\Scripts\python.exe"
-if defined DSH_HOME    set "DSH_BIN=%DSH_HOME%\node_modules\@deepseek-ai\dsh\lib\bin.js"
+if defined DSH_DIR     set "DSH_BIN=%DSH_DIR%\node_modules\@deepseek-ai\dsh\lib\bin.js"
 set "WEBUI_DIR=%WORKBENCH_ROOT%\webui"
 set "STRATA_BASE_URL=http://127.0.0.1:%STRATA_PORT%/v1"
 set "STRATA_HEALTH=http://127.0.0.1:%STRATA_PORT%/health"
@@ -173,7 +192,7 @@ REM  Report
 REM ============================================================
 set "MISSING="
 if not exist "%STRATA_SERVER%" set "MISSING=%MISSING% STRATA_HOME"
-if not exist "%DSH_BIN%"       set "MISSING=%MISSING% DSH_HOME"
+if not exist "%DSH_BIN%"       set "MISSING=%MISSING% DSH_DIR"
 if not defined PYTHON_EXE      set "MISSING=%MISSING% PYTHON"
 
 exit /b 0
@@ -197,7 +216,7 @@ exit /b 0
 :check_dsh
 if "%~1"=="" exit /b 1
 if not exist "%~1\node_modules\@deepseek-ai\dsh\lib\bin.js" exit /b 1
-set "DSH_HOME=%~1"
+set "DSH_DIR=%~1"
 exit /b 0
 
 :check_py

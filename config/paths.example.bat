@@ -46,8 +46,14 @@ REM ------------------------------------------------------------
 REM  4. DeepSeek Harness runtime  --  the folder that contains
 REM     node_modules\@deepseek-ai\dsh\lib\bin.js
 REM     Usually  %USERPROFILE%\dsh-runtime
+REM
+REM     NOTE: this is the INSTALL directory, so it is called
+REM     DSH_DIR. Do not use DSH_HOME here: dsh itself reads
+REM     DSH_HOME to find its state (profiles, credentials), and
+REM     pointing it at the install directory makes dsh start with
+REM     an empty configuration and no local models.
 REM ------------------------------------------------------------
-set "DSH_HOME=C:\Users\YOURNAME\dsh-runtime"
+set "DSH_DIR=C:\Users\YOURNAME\dsh-runtime"
 
 
 REM ------------------------------------------------------------
