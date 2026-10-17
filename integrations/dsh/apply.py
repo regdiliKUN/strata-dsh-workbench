@@ -113,6 +113,17 @@ def provider_block(indent: str, cfg: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def llm_plugin_block(cfg: dict) -> str:
+    """Render a whole llm-pi-ai patch entry for profiles that lack one."""
+    return (
+        "- id: llm-pi-ai\n"
+        "  name: '@deepseek-ai/dsh-llm-pi-ai'\n"
+        "  config:\n"
+        "    providers:\n"
+        + provider_block("      ", cfg)
+    )
+
+
 def patch_cordis(text: str, cfg: dict, set_default: bool):
     """
     Returns (new_text, list_of_notes, changed_bool).
@@ -127,8 +138,22 @@ def patch_cordis(text: str, cfg: dict, set_default: bool):
         if re.match(r"^\s*-\s*id:\s*llm-pi-ai\s*$", ln):
             llm_start = idx
             break
+
+    changed = False
     if llm_start is None:
-        return text, ["llm-pi-ai plugin not found -- profile left untouched"], False
+        # Some dsh builds keep the browser/Electron profile very small and do
+        # not materialise llm-pi-ai in cordis.patch.yml. A valid id-targeted
+        # patch entry can still be added; the loader merges it with the bundle.
+        insert_at = 0
+        for idx, ln in enumerate(lines):
+            if re.match(r"^\s*-\s*id:\s*\S+", ln):
+                insert_at = idx
+                break
+        block = llm_plugin_block(cfg).rstrip("\n").split("\n")
+        lines[insert_at:insert_at] = block + [""]
+        notes.append("added llm-pi-ai patch entry with Strata provider")
+        changed = True
+        llm_start = insert_at
 
     # block ends at the next top-level list item
     llm_end = len(lines)

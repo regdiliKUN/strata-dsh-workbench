@@ -6,6 +6,7 @@
 #  WHERE IT GOES
 #    ~/.dsh/profiles/web/cordis.patch.yml
 #    ~/.dsh/profiles/headless/cordis.patch.yml
+#    ~/.dsh/profiles/desktop/cordis.patch.yml
 #
 #  Inside the plugin entry:
 #
