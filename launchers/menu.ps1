@@ -308,7 +308,10 @@ while ($true) {
 
     switch ($choice.Trim().ToUpper()) {
 
-        '1' { Start-Launcher 'start-workbench.bat' }
+        '1' {
+            if ($IsHome) { Start-Launcher 'start-workbench.bat' }
+            else         { Start-Launcher 'Strata-dsh-Workbench.bat' }
+        }
 
         '2' {
             if (-not (Test-Port $EnginePort)) {
@@ -320,12 +323,20 @@ while ($true) {
                 $ans = Read-Host
                 if ($ans.Trim().ToUpper() -ne 'Y') { continue }
             }
-            Start-Launcher 'start-webui.bat'
+            if ($IsHome) { Start-Launcher 'start-webui.bat' }
+            else         { Start-Launcher 'Strata-WebUI.bat' }
         }
 
-        '3' { Start-Launcher 'start-engine.bat' }
+        '3' {
+            if ($IsHome) { Start-Launcher 'start-engine.bat' }
+            else         { Start-Launcher 'Start-Strata.bat' }
+        }
 
-        '4' { Invoke-InPlace '停止全部' (Join-Path $LauncherDir 'stop-all.bat') @() }
+        '4' {
+            if ($IsHome) { $stop = Join-Path $LauncherDir 'stop-all.bat' }
+            else         { $stop = Join-Path $LauncherDir 'Stop-Strata.bat' }
+            Invoke-InPlace '停止全部' $stop @()
+        }
 
         '5' { Invoke-InPlace '显存体检' (Find-Python) @((Join-Path $ToolsDir 'fix-vram-reserve.py')) }
 

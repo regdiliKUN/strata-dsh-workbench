@@ -109,6 +109,13 @@ if not errorlevel 1 goto py_done
 call :check_py "%STRATA_HOME%\.venv\Scripts\python.exe"
 if not errorlevel 1 goto py_done
 
+REM WorkBuddy managed Python runtimes, when available. These are isolated
+REM from the system Python and are preferred as a safe fallback for WebUI.
+call :check_py "%USERPROFILE%\.workbuddy-ai\binaries\python\versions\3.13.12\python.exe"
+if not errorlevel 1 goto py_done
+call :check_py "%USERPROFILE%\.workbuddy-ai\binaries\python\versions\3.14.7\python.exe"
+if not errorlevel 1 goto py_done
+
 for %%D in (
     "%LOCALAPPDATA%\Programs\Python\Python313\python.exe"
     "%LOCALAPPDATA%\Programs\Python\Python312\python.exe"
