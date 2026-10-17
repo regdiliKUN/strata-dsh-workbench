@@ -12,7 +12,8 @@ if not exist "%ROOT%\config\resolve.bat" (
 )
 call "%ROOT%\config\resolve.bat"
 
-set "LOG_FILE=%STRATA_HOME%\install-strata.log"
+set "LOG_FILE=%INSTALL_LOG%"
+if not defined LOG_READY set "LOG_FILE=%STRATA_HOME%\install-strata.log"
 set "TOTAL_GB=68"
 
 :refresh

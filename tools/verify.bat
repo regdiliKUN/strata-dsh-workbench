@@ -93,6 +93,34 @@ call :chk_file "webui/server.py" "%ROOT%\webui\server.py"
 call :chk_file "webui/index.html" "%ROOT%\webui\index.html"
 echo.
 
+REM ---- 6. Logs -----------------------------------------------
+echo [6] Log directory
+call :chk_path "LOG_DIR" "%LOG_DIR%"
+if defined LOG_READY (
+    call :ok "log directory exists and is writable"
+) else (
+    call :warn "log directory could not be created -- launchers fall back to %TEMP%"
+)
+echo       workbench.log      -> %LAUNCH_LOG%
+echo       webui.log          -> %WEBUI_LOG%
+echo       install-strata.log -> %INSTALL_LOG%
+echo       keep for           -> %LOG_KEEP_DAYS% day(s)
+echo.
+
+REM ---- 7. Engine log -----------------------------------------
+echo [7] Engine log (set inside the Strata config JSON)
+set "ENGINE_LOG="
+if exist "%STRATA_HOME%\strata-%STRATA_PROFILE%.json" (
+    for /f "usebackq tokens=2 delims=:" %%L in (`findstr /c:"\"log\":" "%STRATA_HOME%\strata-%STRATA_PROFILE%.json"`) do set "ENGINE_LOG=%%L"
+)
+if defined ENGINE_LOG (
+    echo       %ENGINE_LOG%
+) else (
+    echo       not found
+)
+echo       move it with:  python tools\set-log-dir.py --apply
+echo.
+
 echo ==================================================
 echo   RESULT:  %PASS% passed   %WARN% warnings   %FAIL% failed
 echo ==================================================

@@ -139,6 +139,29 @@ set "STRATA_BASE_URL=http://127.0.0.1:%STRATA_PORT%/v1"
 set "STRATA_HEALTH=http://127.0.0.1:%STRATA_PORT%/health"
 
 REM ============================================================
+REM  Log directory
+REM  ----------------------------------------------------------
+REM  All launcher logs go here instead of next to the .bat files,
+REM  so a double-click never leaves clutter behind.
+REM
+REM  Override it by setting LOG_DIR in config\paths.bat.
+REM  Leave LOG_DIR empty there to get the default below.
+REM ============================================================
+if not defined LOG_DIR set "LOG_DIR=%LOCALAPPDATA%\strata-dsh-workbench\logs"
+if not defined LOG_KEEP_DAYS set "LOG_KEEP_DAYS=14"
+
+REM strip a trailing backslash so "%LOG_DIR%\x" never becomes "dir\\x"
+if defined LOG_DIR if "%LOG_DIR:~-1%"=="\" set "LOG_DIR=%LOG_DIR:~0,-1%"
+
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%" >nul 2>&1
+
+set "LAUNCH_LOG=%LOG_DIR%\workbench.log"
+set "WEBUI_LOG=%LOG_DIR%\webui.log"
+set "INSTALL_LOG=%LOG_DIR%\install-strata.log"
+set "LOG_READY="
+if exist "%LOG_DIR%" set "LOG_READY=1"
+
+REM ============================================================
 REM  Report
 REM ============================================================
 set "MISSING="

@@ -28,8 +28,11 @@ if not exist "%ROOT%\config\resolve.bat" (
 )
 call "%ROOT%\config\resolve.bat"
 
-set "LOG_FILE=%STRATA_HOME%\install-strata.log"
+set "LOG_FILE=%INSTALL_LOG%"
+if not defined LOG_READY set "LOG_FILE=%STRATA_HOME%\install-strata.log"
 set "VENV_PYTHON=%STRATA_HOME%\.venv\Scripts\python.exe"
+
+call "%ROOT%\config\prune-logs.bat"
 
 REM Use the HuggingFace mirror by default -- much faster from mainland China.
 REM Comment the next line out if you are outside China.

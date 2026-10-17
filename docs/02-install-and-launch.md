@@ -180,7 +180,8 @@ tools\verify.bat
 [3/3] 启动 dsh web
 ```
 
-全程写日志到仓库根目录的 `launcher.log`。
+全程写日志到 `LOG_DIR`（默认 `%LOCALAPPDATA%\strata-dsh-workbench\logs`），
+**不在脚本旁边生成**，所以双击不会在桌面留下 `.log`。
 
 ### 引擎启动预检
 
@@ -196,7 +197,66 @@ tools\verify.bat
 
 ---
 
-## 八、卸载
+## 八、日志放在哪
+
+**默认不在脚本旁边，也不在桌面。** 全部写到：
+
+```
+%LOCALAPPDATA%\strata-dsh-workbench\logs
+    = C:\Users\<你>\AppData\Local\strata-dsh-workbench\logs
+```
+
+| 文件 | 来源 |
+|---|---|
+| `workbench.log` | `Strata-dsh-Workbench.bat` |
+| `webui.log` | `Strata-WebUI.bat` |
+| `install-strata.log` | `tools\install-strata.bat` |
+| `strata-<profile>.log` | Strata 引擎自己（**不在这个目录**，见下） |
+
+### 改日志目录
+
+编辑 `config\paths.bat`：
+
+```bat
+set "LOG_DIR=D:\logs\strata"
+```
+
+留空则用上面的默认值。目录不存在会自动创建；创建失败会退回 `%TEMP%`。
+
+### 自动清理
+
+```bat
+set "LOG_KEEP_DAYS=14"     REM 0 = 永不删除
+```
+
+启动器每次运行调用 `config\prune-logs.bat`，用 `forfiles` 删掉 `LOG_DIR`
+里超过这个天数的 `*.log`。只删 `.log`，同目录的其它文件（比如 `README.txt`）不受影响。
+
+### 引擎日志要单独搬
+
+引擎日志路径由 **Strata 配置 JSON 的 `"log"` 字段**决定，
+`serve/server.py` 没有 `--log` 参数，所以启动器脚本改不到它。
+
+```bat
+python tools\set-log-dir.py                      :: 诊断
+python tools\set-log-dir.py --apply              :: 搬到 LOG_DIR
+python tools\set-log-dir.py --apply --dir "D:\logs\strata"
+python tools\set-log-dir.py --restore            :: 回滚
+```
+
+工具只改 `"log"` 一个字段，改前自动备份，其余配置原样保留。
+
+### 验证
+
+```bat
+tools\verify.bat
+```
+
+第 6 节报告 `LOG_DIR` 是否可用，第 7 节显示引擎日志当前指向哪里。
+
+---
+
+## 九、卸载
 
 ```bat
 launchers\Stop-Strata.bat

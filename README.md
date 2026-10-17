@@ -21,6 +21,7 @@
 - [三个界面，什么时候用哪个](#三个界面什么时候用哪个)
 - [提示词增强](#提示词增强)
 - [必读：显存是这个方案唯一的硬约束](#必读显存是这个方案唯一的硬约束)
+- [日志](#日志)
 - [目录结构](#目录结构)
 - [常见问题](#常见问题)
 - [第三方依赖](#第三方依赖)
@@ -71,7 +72,8 @@
 | **一键继续** | 回答被截断时从断点无缝续写（不是重新生成） |
 | **提示词模板库** | 16 个常用模板，一键插到草稿前面 |
 | **显存体检** | `tools/fix-vram-reserve.py` 自动量出桌面占用并修正 `--vram-reserve-mib` |
-| **环境自检** | `tools/verify.bat` 一次性检查路径、引擎、模型、dsh 集成、WebUI 共 5 大类 |
+| **日志不落地** | 所有日志写到 `LOG_DIR`（默认 `%LOCALAPPDATA%\strata-dsh-workbench\logs`），**双击不会在桌面留垃圾**。可改路径，可设自动清理天数 |
+| **环境自检** | `tools/verify.bat` 一次性检查路径、引擎、模型、dsh 集成、WebUI、日志共 6 大类 |
 | **踩坑文档** | 每个问题都注明怎么确认、怎么修、以及为什么。见 [`docs/05-troubleshooting.md`](docs/05-troubleshooting.md) |
 
 ---
@@ -294,8 +296,9 @@ strata generate: expert arena: cudaHostRegister of the whole arena FAILED (out o
 strata-dsh-workbench/
 ├── setup.bat                      ← 第一步：探测路径、写配置、建快捷方式
 ├── config/
-│   ├── paths.example.bat          路径模板（带完整注释）
-│   └── resolve.bat                加载配置 + 自动探测（启动器共用）
+│   ├── paths.example.bat          路径 + 日志目录模板（带完整注释）
+│   ├── resolve.bat                加载配置 + 自动探测（启动器共用）
+│   └── prune-logs.bat             清理过期日志
 ├── launchers/
 │   ├── Strata-dsh-Workbench.bat   日常主入口：引擎 + dsh
 │   ├── Strata-WebUI.bat           只起 WebUI（8090）
@@ -308,8 +311,9 @@ strata-dsh-workbench/
 ├── tools/
 │   ├── install-strata.bat         装引擎 + 下模型（绕过权限坑）
 │   ├── check-progress.bat         下载进度监视
-│   ├── verify.bat                 环境自检（5 大类）
+│   ├── verify.bat                 环境自检（6 大类）
 │   ├── fix-vram-reserve.py        显存预留自动修正
+│   ├── set-log-dir.py             把引擎日志搬到指定目录
 │   ├── run-strata.bat             引擎启动封装（含显存预检）
 │   ├── create-shortcuts.ps1       建桌面快捷方式
 │   └── strata-folder-agent.py     零依赖文件夹 Agent
@@ -325,6 +329,60 @@ strata-dsh-workbench/
     ├── 04-dsh-integration.md
     └── 05-troubleshooting.md      ← 出问题先看这个
 ```
+
+---
+
+## 日志
+
+**所有日志默认写到 `%LOCALAPPDATA%\strata-dsh-workbench\logs`，不在脚本旁边生成。**
+所以双击启动器不会在桌面留下 `.log` 文件。
+
+| 日志 | 谁写的 | 路径由谁控制 |
+|---|---|---|
+| `workbench.log` | 引擎 + dsh 启动器 | `LOG_DIR` |
+| `webui.log` | WebUI 启动器 | `LOG_DIR` |
+| `install-strata.log` | 安装器 | `LOG_DIR` |
+| `strata-<profile>.log` | **Strata 引擎自己** | Strata 配置 JSON 的 `"log"` 字段 |
+
+### 改日志目录
+
+编辑 `config\paths.bat`（没有就复制 `config\paths.example.bat`）：
+
+```bat
+REM 留空 = 用默认目录 %LOCALAPPDATA%\strata-dsh-workbench\logs
+set "LOG_DIR=D:\logs\strata"
+```
+
+目录不存在会自动创建。想清理旧日志就设保留天数：
+
+```bat
+REM 0 = 永不删除
+set "LOG_KEEP_DAYS=14"
+```
+
+启动器每次运行会调 `config\prune-logs.bat`，删掉 `LOG_DIR` 里超过这个天数的 `*.log`。
+
+### 引擎日志要单独搬
+
+`serve/server.py` **没有** `--log` 参数，引擎日志路径写死在 Strata 配置 JSON 里，
+所以脚本改不到它。用这个工具搬：
+
+```bat
+python tools\set-log-dir.py            :: 先看当前值和目标值
+python tools\set-log-dir.py --apply    :: 搬到 LOG_DIR（自动备份）
+python tools\set-log-dir.py --apply --dir "D:\logs\strata"
+python tools\set-log-dir.py --restore  :: 回滚
+```
+
+它只改 `"log"` 一个字段，其余配置原样保留。
+
+### 检查日志配置
+
+```bat
+tools\verify.bat
+```
+
+第 6 节会报告 `LOG_DIR` 是否可用，第 7 节会显示引擎日志当前指向哪里。
 
 ---
 

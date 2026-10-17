@@ -4,9 +4,6 @@ title Strata + DeepSeek Harness Workbench
 
 set "ROOT=%~dp0.."
 for %%I in ("%ROOT%") do set "ROOT=%%~fI"
-set "LOGFILE=%ROOT%\launcher.log"
-
-echo ===== workbench launcher start %DATE% %TIME% ===== > "%LOGFILE%" 2>&1
 
 REM ---- load configuration -------------------------------------
 if not exist "%ROOT%\config\resolve.bat" (
@@ -15,6 +12,17 @@ if not exist "%ROOT%\config\resolve.bat" (
     exit /b 1
 )
 call "%ROOT%\config\resolve.bat"
+
+REM ---- log file -----------------------------------------------
+REM  The path comes from LOG_DIR (config\paths.bat), so a
+REM  double-click never drops a log next to this script.
+REM  Falls back to %TEMP% if the log directory could not be made.
+set "LOGFILE=%LAUNCH_LOG%"
+if not defined LOG_READY set "LOGFILE=%TEMP%\strata-workbench.log"
+
+call "%ROOT%\config\prune-logs.bat"
+
+echo ===== workbench launcher start %DATE% %TIME% ===== > "%LOGFILE%" 2>&1
 
 echo ==================================================
 echo   Strata + DeepSeek Harness   WORKBENCH

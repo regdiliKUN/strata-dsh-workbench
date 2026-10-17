@@ -3,6 +3,7 @@ config/paths.bat
 config/paths.local.bat
 
 # ---- 运行时产物 ----
+logs/
 *.log
 launcher.log
 webui.log

@@ -4,7 +4,6 @@ title Strata WebUI
 
 set "ROOT=%~dp0.."
 for %%I in ("%ROOT%") do set "ROOT=%%~fI"
-set "LOGFILE=%ROOT%\webui.log"
 
 if not exist "%ROOT%\config\resolve.bat" (
     echo [ERROR] config\resolve.bat not found. Is the repo complete?
@@ -12,6 +11,12 @@ if not exist "%ROOT%\config\resolve.bat" (
     exit /b 1
 )
 call "%ROOT%\config\resolve.bat"
+
+REM ---- log file (from LOG_DIR, see config\paths.bat) ----------
+set "LOGFILE=%WEBUI_LOG%"
+if not defined LOG_READY set "LOGFILE=%TEMP%\strata-webui.log"
+
+call "%ROOT%\config\prune-logs.bat"
 
 echo ==================================================
 echo   Strata WebUI  -  live streaming chat + folder upload

@@ -77,3 +77,35 @@ REM     Strata enforces this key, and dsh must send the same value.
 REM     It is a LOCAL key only -- it never talks to the internet.
 REM ------------------------------------------------------------
 set "STRATA_API_KEY=sk-local-qwen"
+
+
+REM ------------------------------------------------------------
+REM  9. Where the launcher logs go.
+REM
+REM     Leave EMPTY to use the default:
+REM         %LOCALAPPDATA%\strata-dsh-workbench\logs
+REM
+REM     Put logs anywhere you like. Examples:
+REM         set "LOG_DIR=D:\logs\strata"
+REM         set "LOG_DIR=%USERPROFILE%\strata-logs"
+REM         set "LOG_DIR=%WORKBENCH_ROOT%\logs"
+REM
+REM     The directory is created automatically if it does not exist.
+REM     Three files land here:
+REM         workbench.log      the engine + dsh launcher
+REM         webui.log          the WebUI launcher
+REM         install-strata.log the installer
+REM
+REM     The ENGINE's own log (strata-<profile>.log) is NOT set here --
+REM     its path lives in the Strata config JSON. Move it with:
+REM         python tools\set-log-dir.py --apply
+REM ------------------------------------------------------------
+set "LOG_DIR="
+
+
+REM ------------------------------------------------------------
+REM  10. How many days of logs to keep. 0 = never delete.
+REM      Applied by launchers on start: files older than this in
+REM      LOG_DIR are removed. Set to 0 to keep everything.
+REM ------------------------------------------------------------
+set "LOG_KEEP_DAYS=14"
