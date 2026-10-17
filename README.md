@@ -77,6 +77,7 @@
 | **日志不落地** | 所有日志写到 `LOG_DIR`（默认 `%LOCALAPPDATA%\strata-dsh-workbench\logs`），**双击不会在桌面留垃圾**。可改路径，可设自动清理天数 |
 | **环境自检** | `tools/verify.bat` 一次性检查路径、引擎、模型、dsh 集成、WebUI、日志共 6 大类 |
 | **踩坑文档** | 每个问题都注明怎么确认、怎么修、以及为什么。见 [`docs/05-troubleshooting.md`](docs/05-troubleshooting.md) |
+| **界面设计原型** | [`design/codex-switcher/`](design/codex-switcher/index.html) —— 高保真 Web 原型 + 完整设计规范，单文件零依赖 |
 
 ---
 
@@ -374,6 +375,11 @@ strata-dsh-workbench/
 ├── webui/                         ← 零依赖 WebUI
 │   ├── server.py                  静态服务 + SSE 代理 + 上传 + 增强
 │   └── index.html                 单页应用（深色主题）
+├── design/                        ← 独立的界面设计原型
+│   ├── README.md                  怎么预览、设计约定
+│   └── codex-switcher/
+│       ├── index.html             Codex 切换器 高保真 Web 原型（单文件零依赖）
+│       └── DESIGN.md              完整设计规范
 ├── tools/
 │   ├── install-strata.bat         装引擎 + 下模型（绕过权限坑）
 │   ├── check-progress.bat         下载进度监视
