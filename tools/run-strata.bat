@@ -77,11 +77,21 @@ if defined VRAM_LOW goto vram_warn
 goto vram_ok
 
 :vram_warn
-echo   [WARN] Only %VRAM_FREE% MiB of VRAM is free right now.
-echo          Strata needs roughly 2-3 GB left for the desktop.
-echo          Close browsers / chat apps / games, then retry.
-echo          Or raise the reserve:  python tools\fix-vram-reserve.py --apply
 echo.
+echo   [FATAL] Only %VRAM_FREE% MiB of VRAM is free right now.
+echo           Strata needs 3000+ MiB free AFTER loading, otherwise WDDM
+echo           silently pages VRAM to system RAM: startup looks normal and
+echo           only the speed collapses (requests never finish).
+echo.
+echo   Fix:  ollama stop ^<model^>      (Ollama + Strata cannot share the card)
+echo         close browsers / wallpaper engine / recording tools
+echo         or raise the reserve:  python tools\fix-vram-reserve.py --apply
+echo.
+echo   Refusing to start. This is deliberate: a warning was ignored before
+echo   and the engine ran at 1/3 speed for hours.
+echo.
+pause
+exit /b 1
 
 :vram_ok
 echo   Loading the model. First token can take 1-3 minutes.
@@ -126,7 +136,7 @@ REM ============================================================
 :check_vram
 set "VRAM_FREE="
 set "VRAM_LOW="
-for /f "tokens=*" %%A in ('nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2^>nul') do set "VRAM_FREE=%%A"
+for /f "tokens=*" %%A in ('nvidia-smi "--query-gpu=memory.free" "--format=csv,noheader,nounits" 2^>nul') do set "VRAM_FREE=%%A"
 if not defined VRAM_FREE exit /b 0
 set /a VRAM_N=0
 for /f "delims=" %%A in ("%VRAM_FREE%") do set /a VRAM_N=%%A 2>nul
