@@ -519,14 +519,20 @@ const cfg = {
   model: 'qwen3.8-flash-next-iq2_xs',
   temperature: 0.6,
   top_p: 0.95,
-  max_tokens: null,
-  ctxLimit: 131072,
+  top_k: 20,            // Qwen 系推荐；不设会让采样退化成近似贪心
+  max_tokens: 4096,     // 原 null → 引擎 n_predict=-1（无上限，单条回复能吃穿窗口）
+  ctxLimit: 65536,      // 与 dsh 的 contextWindow 对齐（原 131072 与快 KV 窗口 32768 差 4 倍）
 };
+
+/* 上下文预算：中文约 1.5-1.7 字/token，用 1.6 而不是英文经验的 2.6 */
+const CHARS_PER_TOKEN = 1.6;
+const CTX_CHAR_BUDGET = Math.floor(cfg.ctxLimit * CHARS_PER_TOKEN * 0.75);  // 留 25% 给输出
+const HISTORY_CHAR_BUDGET = Math.floor(CTX_CHAR_BUDGET * 0.7);              // 历史最多占 70%
 
 /* ---------------- 文件类型判断 ---------------- */
 const TEXT_EXT = new Set(['txt','md','markdown','py','js','mjs','cjs','ts','tsx','jsx','json','yaml','yml','toml','ini','cfg','conf','html','htm','css','scss','less','vue','svelte','java','kt','c','h','cpp','hpp','cc','cs','go','rs','rb','php','swift','sh','bash','bat','cmd','ps1','sql','xml','csv','tsv','log','env','gitignore','dockerfile','makefile','gradle','properties','r','lua','pl','dart','scala','clj','ex','exs','erl','hs','ml','nim','zig','v','asm','tex','rst','adoc','srt','vtt','ipynb']);
-const MAX_FILE = 512 * 1024;        // 单文件读取上限 512KB
-const MAX_TOTAL = 420 * 1024;       // 上下文总字符上限
+const MAX_FILE = 256 * 1024;        // 单文件读取上限 256KB（原 512KB）
+const MAX_TOTAL = Math.floor(CTX_CHAR_BUDGET * 0.5);  // 文件夹上下文最多占 50%，原 420KB 本身已超窗口
 
 function extOf(name){
   const i = name.lastIndexOf('.');
@@ -747,7 +753,7 @@ function updateMeta(){
   // 估算字符数（按平均文件大小粗估）
   const est = Math.min(picked.reduce((a,f) => a + f.size, 0), MAX_TOTAL);
   $('mChars').textContent = est.toLocaleString();
-  const tok = Math.round(est / 2.6);
+  const tok = Math.round(est / CHARS_PER_TOKEN);
   $('mToken').textContent = '估算 ≈ ' + tok.toLocaleString() + ' tokens / 上限 ' + cfg.ctxLimit.toLocaleString();
   $('meterBar').style.width = Math.min(100, est / MAX_TOTAL * 100) + '%';
 }
@@ -819,7 +825,7 @@ function renderChips(){
     box.innerHTML = '';
     return;
   }
-  const tok = Math.round(state.context.length / 2.6);
+  const tok = Math.round(state.context.length / CHARS_PER_TOKEN);
   box.innerHTML = '<span class="chip">📁 <b>' + esc(state.rootName) + '</b> · '
     + state.picked.length + ' 个文件 · ≈' + tok.toLocaleString() + ' tokens'
     + ' <span class="x" id="chipClear">✕</span></span>';
@@ -1078,6 +1084,28 @@ function attachMsgActions(bubble){
   + '<button class="tbtn" data-act="copy">⧉ 复制</button>';
 }
 
+/* ---- 历史裁剪 ----
+   原实现只 push 不 trim：聊到 7 万 token 后每一轮都在走 PCIe 流式注意力，
+   表现为"越聊越慢、越聊越笨"。这里按字符预算保留最近若干轮，
+   并保证第一条是 user（避免以 assistant 开头导致模板渲染异常）。 */
+function trimHistory(){
+  let total = 0;
+  const keep = [];
+  for (let i = state.history.length - 1; i >= 0; i--){
+    const m = state.history[i];
+    const len = (m.content || '').length;
+    if (total + len > HISTORY_CHAR_BUDGET && keep.length >= 2) break;
+    keep.unshift(m);
+    total += len;
+  }
+  while (keep.length && keep[0].role !== 'user') keep.shift();
+  if (keep.length !== state.history.length){
+    console.warn('[ctx] 历史裁剪:', state.history.length, '→', keep.length,
+                 '条，约', Math.round(total / CHARS_PER_TOKEN), 'tokens');
+  }
+  state.history = keep;
+}
+
 /* ---- 发送 ---- */
 async function send(){
   const input = $('input');
@@ -1094,6 +1122,7 @@ async function send(){
   const bubble = addMsg('ai', '');
   bubble.innerHTML = '<span class="cursor"></span>';
 
+  trimHistory();
   const messages = [];
   if (state.context){
     messages.push({ role: 'system', content: state.context });
@@ -1131,6 +1160,7 @@ async function continueMsg(bubble){
     state.history.push({ role: 'assistant', content: prev });
   }
 
+  trimHistory();
   const messages = [];
   if (state.context) messages.push({ role: 'system', content: state.context });
   messages.push(...state.history);
