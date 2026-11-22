@@ -3,7 +3,7 @@
 零依赖的本地对话界面。纯 Python 标准库 + 单文件 HTML，不装任何 pip 包，
 不用任何前端框架或 CDN，**可完全离线运行**。
 
-启动：`launchers\Strata-WebUI.bat` → 浏览器打开 `http://127.0.0.1:8090`
+启动：`launchers\Strata-WebUI.bat` → 浏览器打开 `http://127.0.0.1:18090`
 
 ---
 
@@ -244,11 +244,11 @@ data: {"type":"done","variants":2}
 
 | 变量 | 默认值 | 说明 |
 |---|---|---|
-| `STRATA_BASE_URL` | `http://127.0.0.1:8080/v1` | 引擎接口地址 |
+| `STRATA_BASE_URL` | `http://127.0.0.1:18080/v1` | 引擎接口地址 |
 | `STRATA_API_KEY` | `sk-local-qwen` | 本地密钥 |
 | `STRATA_MODEL` | `qwen3.8-flash-next-iq2_xs` | 模型 id |
 | `STRATA_WEB_HOST` | `127.0.0.1` | 监听地址 |
-| `STRATA_WEB_PORT` | `8090` | 监听端口 |
+| `STRATA_WEB_PORT` | `18090` | 监听端口 |
 
 启动器会从 `config\paths.bat` 自动填好这些值。
 

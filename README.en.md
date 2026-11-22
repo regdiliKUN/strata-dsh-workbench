@@ -20,8 +20,8 @@ and can actually touch your files.
 ```
 You
  ├─ http://127.0.0.1:3080 ─► DeepSeek Harness    (agent: files, shell, subagents, MCP)
- ├─ http://127.0.0.1:8090 ─► Strata WebUI        (chat, folder upload, prompt enhance)
- └─ http://127.0.0.1:8080 ─► Strata engine       (Qwen3.8-Flash-Next 125B MoE)
+ ├─ http://127.0.0.1:18090 ─► Strata WebUI        (chat, folder upload, prompt enhance)
+ └─ http://127.0.0.1:18080 ─► Strata engine       (Qwen3.8-Flash-Next 125B MoE)
 ```
 
 Both front-ends call the same OpenAI-compatible endpoint. dsh can drive Strata; not the reverse.

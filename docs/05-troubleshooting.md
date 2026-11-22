@@ -374,5 +374,5 @@ nvidia-smi --query-gpu=name,memory.total,memory.used,memory.free --format=csv
 echo ===== 引擎日志关键行 =====
 findstr /c:"VRAM free" /c:"memory guard" /c:"cudaHostRegister" /c:"expert arena" "%STRATA_HOME%\strata-iq2_xs.log"
 echo ===== 端口 =====
-netstat -ano | findstr ":8080 :8090"
+netstat -ano | findstr ":18080 :18090"
 ```

@@ -15,7 +15,7 @@
 - 许可：**MIT**
 - 本仓库如何与之交互：
   - 通过 `tools/run-strata.bat` 调用 `serve/server.py` 启动它
-  - 通过 HTTP 访问其 OpenAI 兼容接口（`http://127.0.0.1:8080/v1`）
+  - 通过 HTTP 访问其 OpenAI 兼容接口（`http://127.0.0.1:18080/v1`）
   - 读取并修改它生成的 `strata-<profile>.json` 启动配置
 - **未包含**：任何 `.cpp` / `.h` / `.py` 源文件、编译产物、模型权重
 

@@ -28,7 +28,7 @@ USAGE
     python apply.py --apply              # write changes (with backups)
     python apply.py --apply --no-default # do not touch agent-default-model
     python apply.py --restore            # roll back to the newest backup
-    python apply.py --base-url http://127.0.0.1:8080/v1 --port 8080
+    python apply.py --base-url http://127.0.0.1:18080/v1 --port 18080
 """
 
 import argparse
@@ -40,7 +40,7 @@ import sys
 from pathlib import Path
 
 # ---------------------------------------------------------------- defaults
-DEFAULT_BASE_URL = "http://127.0.0.1:8080/v1"
+DEFAULT_BASE_URL = "http://127.0.0.1:18080/v1"
 DEFAULT_API_KEY = "sk-local-qwen"
 DEFAULT_API_KEY_ENV = "STRATA_API_KEY"
 DEFAULT_PROVIDER_ID = "strata-local"

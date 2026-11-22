@@ -18,8 +18,8 @@ REM ---- 1. load user config (optional) -------------------------
 if exist "%~dp0paths.bat" call "%~dp0paths.bat"
 
 REM ---- 2. defaults for anything still unset -------------------
-if not defined STRATA_PORT  set "STRATA_PORT=8080"
-if not defined WEB_PORT     set "WEB_PORT=8090"
+if not defined STRATA_PORT  set "STRATA_PORT=18080"
+if not defined WEB_PORT     set "WEB_PORT=18090"
 if not defined STRATA_API_KEY set "STRATA_API_KEY=sk-local-qwen"
 if not defined STRATA_PROFILE set "STRATA_PROFILE=iq2_xs"
 if not defined NODE_EXE     set "NODE_EXE=node"

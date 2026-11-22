@@ -201,7 +201,7 @@ def main():
     ap = argparse.ArgumentParser(description="修正 Strata 的 --vram-reserve-mib")
     ap.add_argument("--apply", action="store_true", help="真正写入（默认只诊断）")
     ap.add_argument("--config", help="指定 strata-*.json；不给则自动搜索")
-    ap.add_argument("--port", type=int, default=8080, help="引擎端口，用于判断它是否在运行")
+    ap.add_argument("--port", type=int, default=18080, help="引擎端口，用于判断它是否在运行")
     ap.add_argument("--min", type=int, default=0, help="强制一个下限")
     ap.add_argument("--assume-desktop", type=int, default=0, metavar="MIB",
                     help="引擎在跑时，手工指定桌面实际占用（跳过自动测量）")

@@ -73,8 +73,8 @@ setup.bat
 | `DSH_DIR` | dsh 运行时（安装）目录 | 必须含 `node_modules\@deepseek-ai\dsh\lib\bin.js`；**不要写成 `DSH_HOME`**，那是 dsh 自己的状态目录变量 |
 | `NODE_EXE` | Node 可执行文件 | 留 `node` 走 PATH |
 | `PYTHON_EXE` | Python 可执行文件 | 留空自动探测 |
-| `STRATA_PORT` | 引擎端口 | 默认 8080 |
-| `WEB_PORT` | WebUI 端口 | 默认 8090 |
+| `STRATA_PORT` | 引擎端口 | 默认 18080 |
+| `WEB_PORT` | WebUI 端口 | 默认 18090 |
 | `STRATA_API_KEY` | 本地密钥 | 必须与 `strata-<profile>.json` 里的 `api_key` 一致 |
 
 > `config\paths.bat` 已被 `.gitignore` 排除，你的本地路径不会离开这台机器。

@@ -14,7 +14,7 @@ Strata Chat WebUI - 本地实时对话 + 文件夹上传 + 提示词增强
 
 启动:
   python server.py
-  然后浏览器打开 http://127.0.0.1:8090
+  然后浏览器打开 http://127.0.0.1:18090
 """
 
 import json
@@ -35,10 +35,10 @@ _NO_PROXY_OPENER = urllib.request.build_opener(
 )
 
 # ==================== 配置 ====================
-STRATA_BASE = os.environ.get("STRATA_BASE_URL", "http://127.0.0.1:8080/v1")
+STRATA_BASE = os.environ.get("STRATA_BASE_URL", "http://127.0.0.1:18080/v1")
 STRATA_KEY = os.environ.get("STRATA_API_KEY", "sk-local-qwen")
 WEB_HOST = os.environ.get("STRATA_WEB_HOST", "127.0.0.1")
-WEB_PORT = int(os.environ.get("STRATA_WEB_PORT", "8090"))
+WEB_PORT = int(os.environ.get("STRATA_WEB_PORT", "18090"))
 
 WEB_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_ROOT = os.path.join(WEB_ROOT, "uploads")

@@ -43,7 +43,7 @@ python integrations\dsh\apply.py --restore
 
 | 参数 | 说明 |
 |---|---|
-| `--base-url` | 引擎地址，默认 `http://127.0.0.1:8080/v1` |
+| `--base-url` | 引擎地址，默认 `http://127.0.0.1:18080/v1` |
 | `--api-key` | 本地密钥，默认 `sk-local-qwen` |
 | `--provider-id` | provider 名字，默认 `strata-local` |
 | `--model-id` | 模型 id，默认 `qwen3.8-flash-next-iq2_xs` |

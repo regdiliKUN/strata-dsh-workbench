@@ -50,8 +50,8 @@ $ToolsDir = Join-Path $RepoRoot 'tools'
 
 # ---- 默认值 ----
 $StrataHome = 'F:\Strata'
-$EnginePort = 8080
-$WebPort    = 8090
+$EnginePort = 18080
+$WebPort    = 18090
 $DshPort    = 3080
 $LogDir     = Join-Path $env:LOCALAPPDATA 'strata-dsh-workbench\logs'
 
@@ -222,7 +222,7 @@ function Show-Status {
 function Show-Menu {
     Write-Rule '启动'
     Write-Item '1' '启动工作台'     '引擎 + dsh Agent'          '打开 :3080'
-    Write-Item '2' '启动 WebUI'     '对话 / 文件夹 / 提示词'    '打开 :8090'
+    Write-Item '2' '启动 WebUI'     '对话 / 文件夹 / 提示词'    '打开 :18090'
     Write-Item '3' '只启动引擎'     '不开界面，供其它程序调用'  (':' + $EnginePort)
     Write-Host ''
 

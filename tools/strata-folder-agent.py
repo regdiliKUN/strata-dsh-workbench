@@ -21,7 +21,7 @@ import urllib.request
 import urllib.error
 
 # ============ 配置区 ============
-API_BASE = os.environ.get("STRATA_BASE_URL", "http://127.0.0.1:8080/v1")
+API_BASE = os.environ.get("STRATA_BASE_URL", "http://127.0.0.1:18080/v1")
 API_KEY = os.environ.get("STRATA_API_KEY", "sk-local-qwen")
 MODEL = os.environ.get("STRATA_MODEL", "qwen3.8-flash-next-iq2_xs")
 
@@ -126,7 +126,7 @@ def call_api(messages, stream=False):
     except urllib.error.URLError as e:
         raise RuntimeError(
             f"无法连接 {url}\n原因: {e.reason}\n"
-            f"请确认已双击运行桌面上的 Start Strata.bat，且 http://127.0.0.1:8080 可以打开。"
+            f"请确认已双击运行桌面上的 Start Strata.bat，且 http://127.0.0.1:18080 可以打开。"
         )
     obj = json.loads(body)
     if "choices" in obj:

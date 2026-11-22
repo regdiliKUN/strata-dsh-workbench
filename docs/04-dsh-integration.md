@@ -46,7 +46,7 @@ dsh 的 `cordis.patch.yml` 里含 `!!js` 自定义标签（例如把 JS 表达�
         displayName: Strata Local (Qwen3.8-Flash-Next 125B MoE)
         apiKeyEnv: STRATA_API_KEY
         api: openai-completions
-        baseURL: http://127.0.0.1:8080/v1
+        baseURL: http://127.0.0.1:18080/v1
         models:
           - id: qwen3.8-flash-next-iq2_xs
             name: Qwen3.8-Flash-Next IQ2_XS (125B MoE, 128K)
