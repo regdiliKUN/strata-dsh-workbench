@@ -44,7 +44,7 @@ WEB_ROOT = os.path.dirname(os.path.abspath(__file__))
 UPLOAD_ROOT = os.path.join(WEB_ROOT, "uploads")
 
 # 上传限制
-MAX_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024  # 单次上传上限 2GB
+MAX_UPLOAD_BYTES = 256 * 1024 * 1024  # 单次上传上限 256MB（原 2GB，会把进程撑爆）
 MAX_FILE_BYTES = 256 * 1024 * 1024         # 单文件上限 256MB
 
 # ---- 提示词增强 ----
@@ -335,7 +335,20 @@ class Handler(BaseHTTPRequestHandler):
             self._send_json({"error": f"上传超过上限 {MAX_UPLOAD_BYTES} 字节"}, 413)
             return
 
-        raw = self.rfile.read(length)
+        # 分块读：Content-Length 可能撒谎（声明的长度远大于实际发送量），
+        # 一次性 read(length) 会先分配那么大的缓冲。这里边读边判上限。
+        buf = bytearray()
+        remaining = length
+        while remaining > 0:
+            chunk = self.rfile.read(min(65536, remaining))
+            if not chunk:
+                break
+            buf.extend(chunk)
+            remaining -= len(chunk)
+            if len(buf) > MAX_UPLOAD_BYTES:
+                self._send_json({"error": f"上传超过上限 {MAX_UPLOAD_BYTES} 字节"}, 413)
+                return
+        raw = bytes(buf)
 
         # 用 email 模块解析 multipart，纯标准库方案
         head = f"Content-Type: {ctype}\r\n\r\n".encode("utf-8", errors="ignore")
@@ -388,7 +401,16 @@ class Handler(BaseHTTPRequestHandler):
                 continue
 
             target = os.path.abspath(os.path.join(dest_root, rel))
-            if not target.startswith(os.path.abspath(dest_root)):
+            # 必须用 realpath + commonpath 判越界：
+            # 原来用 startswith 做前缀比较，dest_root=E:\uploads 时
+            # E:\uploads_evil\... 也会被当成"在目录内"。
+            root_real = os.path.realpath(dest_root)
+            target_real = os.path.realpath(target)
+            try:
+                inside = os.path.commonpath([root_real, target_real]) == root_real
+            except ValueError:            # 不同盘符
+                inside = False
+            if not inside or target_real == root_real:
                 skipped.append({"path": filename, "reason": "路径越界"})
                 continue
 
